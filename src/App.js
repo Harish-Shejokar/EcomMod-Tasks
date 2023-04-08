@@ -6,11 +6,16 @@ import LoadingSpinner from './components/Loading/LoadingSpinner';
 function App() {
   const [movies, setMovies] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-
+  const [error, setError] = useState(null);
+  const [intervalID, setIntervalID] = useState(null);
+  
   const fethMoviesHandler = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch("https://swapi.dev/api/films/")
+      const response = await fetch("https://swapi.dev/api/film/")
+      if (!response.ok) {
+        throw new Error('somthing went wrong ...Retrying');
+      }
       const data = await response.json();
       // console.log(data.results)
       const transformedMovies = data.results.map((movieData) => {
@@ -22,14 +27,28 @@ function App() {
         };
       });
       setMovies(transformedMovies);
-      setIsLoading(false);
     }
-    catch (err) {
-      console.log(err)
+    catch (err) { 
+     
+      // console.log(err.message)
+      // clearInterval(intervalID);
+      setError(err.message);
+      
+      setIntervalID((prevId) => {
+        console.log(prevId)
+        clearInterval(prevId);
+        const Id = setInterval(fethMoviesHandler, 5000);
+        return Id;
+      });
+     
     }
+    setIsLoading(false);
   }
   
-
+  const fun = () => {
+    console.log('done',intervalID)
+    clearInterval(intervalID);
+  }
 
   return (
     <React.Fragment>
@@ -37,9 +56,16 @@ function App() {
         <button onClick={fethMoviesHandler}>Fetch Movies</button>
       </section>
       <section>
-        {isLoading && <LoadingSpinner/>}
+        {!isLoading && !error && <MoviesList movies={movies} />}
+        {movies.length === 0 && !error && <p>NO Movies Found</p>}
+        {isLoading && <LoadingSpinner />}
+        {error && (
+          <div>
+            <p>{error}</p>
+            <button onClick={fun}>Cancel</button>
+          </div>
+        )}
         {/* {isLoading && <p>Loading....</p>} */}
-        {!isLoading &&<MoviesList movies={movies} />}
       </section>
     </React.Fragment>
   );
