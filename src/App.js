@@ -2,6 +2,7 @@ import React, { useEffect,useCallback, useState } from "react";
 import MoviesList from "./components/MoviesList";
 import "./App.css";
 import LoadingSpinner from "./components/Loading/LoadingSpinner";
+import Form from "./components/Form/Form";
 
 function App() {
   const [movies, setMovies] = useState([]);
@@ -10,42 +11,42 @@ function App() {
   const [intervalID, setIntervalID] = useState(null);
 
  
-   const fethMoviesHandler = useCallback(async () => {
-     try {
-       setIsLoading(true);
-       const response = await fetch("https://swapi.dev/api/films/");
-       if (!response.ok) {
-         throw new Error("somthing went wrong ...Retrying");
-       }
-       const data = await response.json();
-       // console.log(data.results)
-       const transformedMovies = data.results.map((movieData) => {
-         return {
-           id: movieData.episode_id,
-           title: movieData.title,
-           openingText: movieData.opening_crawl,
-           releaseDate: movieData.release_date,
-         };
-       });
-       setMovies(transformedMovies);
-     } catch (err) {
-       // console.log(err.message)
-       // clearInterval(intervalID);
-       setError(err.message);
+  const fethMoviesHandler = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch("https://swapi.dev/api/films/");
+      if (!response.ok) {
+        throw new Error("somthing went wrong ...Retrying");
+      }
+      const data = await response.json();
+      // console.log(data.results)
+      const transformedMovies = data.results.map((movieData) => {
+        return {
+          id: movieData.episode_id,
+          title: movieData.title,
+          openingText: movieData.opening_crawl,
+          releaseDate: movieData.release_date,
+        };
+      });
+      setMovies(transformedMovies);
+    } catch (err) {
+      // console.log(err.message)
+      // clearInterval(intervalID);
+      setError(err.message);
 
-       setIntervalID((prevId) => {
-         console.log(prevId);
-         clearInterval(prevId);
-         const Id = setInterval(fethMoviesHandler, 5000);
-         return Id;
-       });
-     }
-     setIsLoading(false);
-   }, []);
+      setIntervalID((prevId) => {
+        console.log(prevId);
+        clearInterval(prevId);
+        const Id = setInterval(fethMoviesHandler, 5000);
+        return Id;
+      });
+    }
+    setIsLoading(false);
+  },[]);
   
    useEffect(() => {
      fethMoviesHandler();
-   }, []);
+   },[fethMoviesHandler]);
 
     
 
@@ -56,9 +57,12 @@ function App() {
 
   return (
     <React.Fragment>
-      {/* <section>
-        <button >Fetch Movies</button>
-      </section> */}
+      
+        <Form />
+      
+      <section>
+        <button onClick={fethMoviesHandler}>Fetch Movies</button>
+      </section>
       <section>
         {!isLoading && !error && <MoviesList movies={movies} />}
         {movies.length === 0 && !error && <p>NO Movies Found</p>}
