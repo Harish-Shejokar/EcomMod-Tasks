@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 import classes from "./Form.module.css";
-const Form = () => {
+const Form = (props) => {
   const titleRef = useRef();
   const textRef = useRef();
   const release_dateRef = useRef();
@@ -10,7 +10,13 @@ const Form = () => {
     const text = textRef.current.value;
     const release = release_dateRef.current.value;
     console.log(title, text, release)
-    
+    const obj = {
+      episode_id: Math.random(),
+      title: title,
+      opening_crawl: text,
+      release_date: release,
+    };
+    props.onAddMovies(obj);
     
     titleRef.current.value = "";
     textRef.current.value = "";
@@ -22,7 +28,7 @@ const Form = () => {
       <label>Title</label>
       <input ref={titleRef} type="text" />
       <label>Opening Text</label>
-      <input ref={textRef} className={classes["open-text"]} type="text" />
+      <input ref={textRef} rows='5' className={classes["open-text"]} type="text" />
       <label>Release_date</label>
       <input ref={release_dateRef} type="date" />
       <button onClick={addMoviesHandler}>Add Movie</button>
